@@ -1,3 +1,6 @@
+
+<img width="2816" height="1536" alt="an&#39;khalmar-profile-pic" src="https://github.com/user-attachments/assets/a3d02be3-2ae1-415b-8a74-912093f0b0d3" />
+
 Welcome to An' Khalmar, a fractured world where your choices shape your very essence. This is a text-based adventure RPG written in Python, designed to explore narrative-driven decision-making, hidden paths, and stat-based endings.
 
 This is my first game project, created with a focus on storytelling, player choice, and replayability.
