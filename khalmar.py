@@ -1,212 +1,479 @@
-#this is my first game I am creating so hold onto your seats ladies and gentlemen
+import os
+import sys
+import time
 
 
-#welcome
-print("Welcome to An' Khalmar! A fractured world where your choices reflect your very essence.")
-start = input("Would you like to begin your adventure? (Y/N)")
+# --- VISUAL TOOLKIT ---
+class Colors:
+    # Standard
+    RED = '\033[31m'
+    GREEN = '\033[32m'
+    GOLD = '\033[33m'
+    BLUE = '\033[34m'
+    PURPLE = '\033[35m'
+    CYAN = '\033[36m'
+    WHITE = '\033[37m'
 
-if start == 'Y':
-    print("Let the tale of your adventure begin.")
+    # Bright (High Intensity)
+    LAVA = '\033[91m'  # Bright Red
+    LIME = '\033[92m'  # Bright Green
+    SUN = '\033[93m'  # Bright Gold
+    SKY = '\033[94m'  # Bright Blue
+    MAGENTA = '\033[95m'  # Bright Purple
+    ICE = '\033[96m'  # Bright Cyan
+
+    # Formatting
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    END = '\033[0m'
+
+
+def clear_screen():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+
+def slow_print(text, delay=0.005):
+    for char in text:
+        sys.stdout.write(char)
+        sys.stdout.flush()
+        time.sleep(delay)
+    print()
+
+
+# --- DATABASE: ITEM FLAVOR TEXT ---
+ITEM_DATA = {
+    "Trailworn Sigil": "An item etched by countless footsteps.",
+    "Whisperleaf Charm": "A leaf that murmurs when held.",
+    "Gnarled Antler Shard": "Its still warm with primal force.",
+    "Fenwalker's Mark": "A mud-caked emblem of survival.",
+    "Murksap Phial": "Thick, slow-moving, but faintly alive.",
+    "Bogfang Relic": "It was pulled from something that did not wish to surface.",
+    "Sun-Written Fragment": "Patterns are burned into ancient stone.",
+    "Glassbound Dew": "Water that should not exist.",
+    "Scorched Crest": "Proof that will can rival heat.",
+    "Echo Pearl": "It hums with distant memories.",
+    "Abyssline Scale": "It was drawn from unseen depths.",
+    "Tidebound Fang": "It is salt-stained but unbroken.",
+    "Obsidian Waystone": "Its worn smooth from heat and time.",
+    "Cinder Reliquary": "An ash that refuses to cool.",
+    "Emberheart Fragment": "Its still beating with fire.",
+    "Frostbound Compass": "The needle always points forward, never back.",
+    "Winterbone Talisman": "Its warm despite the frigid air.",
+    "Glacier Eye Shard": "It somehow feels as if its aware you are observing it.",
+    "Skycarved Relic": "It was etched by wind and effort.",
+    "Ironvein Core": "Its dense with quiet strength like that of an immovable boulder.",
+    "Crownstone Fragment": "It was taken from a place few reach.",
+    "Equilibrium Sigil": "Its perfectly symmetrical and impossible to tilt.",
+    "Grain of the Whole": "One grain, yet heavier than many.",
+    "Unending Measure": "It is neither full nor empty.",
+    "Memory Sigil": "Formed from moments overflowing with emotions.",
+    "Aetherbound Anchor": "It refuses to drift away, remaining bastioned.",
+    "True Name Shard": "It is much heavier than it looks..."
+}
+
+
+# --- UI SYSTEMS ---
+def show_quest_log(wis, wll, pat, det, inv):
+    clear_screen()
+    print(f"{Colors.GOLD}╔══════════════════════════════════════════════════════╗{Colors.END}")
+    print(f"{Colors.GOLD}║                ESSENCE & POSSESSIONS                 ║{Colors.END}")
+    print(f"{Colors.GOLD}╠══════════════════════════════════════════════════════╣{Colors.END}")
+    print(f"  Wisdom:   {wis:<5} Will:     {wll:<5}")
+    print(f"  Patience: {pat:<5} Detachment: {det:<5}")
+    print(f"{Colors.GOLD}╠══════════════════════════════════════════════════════╣{Colors.END}")
+    print(f"  INVENTORY:")
+    if not inv:
+        print("    (Empty)")
+    for item in inv:
+        desc = ITEM_DATA.get(item, "A mysterious artifact.")
+        print(f"  • {Colors.BOLD}{item}{Colors.END}: {desc}")
+    print(f"{Colors.GOLD}╚══════════════════════════════════════════════════════╝{Colors.END}")
+    input("\n[Press Enter to return to your journey]")
+
+
+def get_choice(options, wis, wll, pat, det, inv, art="", art_color=""):
+    while True:
+        print("\n" + "─" * 45)
+        for i, opt in enumerate(options, 1):
+            print(f"{i}. {opt}")
+
+        choice_raw = input(f"\n{Colors.BOLD}Choice (1-{len(options)}) or [0] Essence Log: {Colors.END}")
+
+        if choice_raw == '0':
+            show_quest_log(wis, wll, pat, det, inv)
+            clear_screen()
+            if art: print(art_color + art + Colors.END)
+            print(f"{Colors.BOLD}Returning to the path...{Colors.END}")
+            continue
+
+        try:
+            choice = int(choice_raw)
+            if 1 <= choice <= len(options):
+                return choice
+            print("That choice does not exist in this realm.")
+        except ValueError:
+            print("The world does not understand that command.")
+
+
+# --- UPDATED ART ASSETS ---
+TITLE_ART = f"""
+{Colors.SUN}   ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+   █░░░░░░░░░░░░░   {Colors.ICE}AN' KHALMAR{Colors.SUN}   ░░░░░░░░░░░░░░░░░░░█
+   █░░░░░░░░░░░░ {Colors.RED}A FRACTURED WORLD{Colors.SUN} ░░░░░░░░░░░░░░░░░░█
+   ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀{Colors.END}
+"""
+
+FOREST_ART = r"""
+          ▓▓▓▓      ▒▒▒▒      ▓▓▓▓
+         ▓▓▓▓▓▓    ▒▒▒▒▒▒    ▓▓▓▓▓▓
+          ████      ████      ████
+           ██        ██        ██
+    ───────██────────██────────██────────
+"""
+
+MARSH_ART = r"""
+      ░░  ░░      ░░  ░░      ░░  ░░
+     ▒▒▒▒▒▒▒▒    ▒▒▒▒▒▒▒▒    ▒▒▒▒▒▒▒▒
+    ▓▓▓▓▓▓▓▓▓▓  ▓▓▓▓▓▓▓▓▓▓  ▓▓▓▓▓▓▓▓▓▓
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
+DESERT_ART = r"""
+             ▲              ▲
+            ▓▓▓            ▓▓▓
+           ▓▓▓▓▓    ▲     ▓▓▓▓▓
+    ______▓▓▓▓▓▓▓__▓▓▓___▓▓▓▓▓▓▓______
+"""
+
+OCEAN_ART = r"""
+       _      _      _      _      _
+     _/ \_  _/ \_  _/ \_  _/ \_  _/ \_
+    <     ><     ><     ><     ><     >
+     \___/  \___/  \___/  \___/  \___/
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
+VOLCANO_ART = r"""
+              (  ░░  )
+             (  ▒▒▒▒  )
+            /   ▓▓▓▓   \
+           /    ████    \
+          /   /▓▓▓▓▓▓\   \
+    _____/___/████████\___\_____
+"""
+
+TUNDRA_ART = r"""
+       * ❄️    * ❄️    * ❄️
+      /▒\  /▒\  /▒\  /▒\  /▒\  /▒\
+     /▒▒▒\/▒▒▒\/▒▒▒\/▒▒▒\/▒▒▒\/▒▒▒\
+    [_______________________________]
+"""
+
+MOUNTAIN_ART = r"""
+               ▲
+              ███      ▲
+         ▲   █████    ███
+        ███ ███████  █████
+    ___█████████████████████___
+"""
+
+SCALES_ART = r"""
+           ▒▒▒▒▒  █  ▒▒▒▒▒
+            ▒▒▒   █   ▒▒▒
+             ▒    █    ▒
+            █████████████
+                  █
+"""
+
+WELKIN_ART = r"""
+        ☁️   ☁️          ☁️   ☁️
+      ░░░░░░░░        ░░░░░░░░
+     ▒▒▒▒▒▒▒▒▒▒      ▒▒▒▒▒▒▒▒▒▒
+    ░░░░░░░░░░░░    ░░░░░░░░░░░░
+"""
+
+# --- GAME START ---
+clear_screen()
+print(TITLE_ART)
+slow_print("Welcome to An' Khalmar! A fractured world where your choices reflect your very essence.")
+if input("\nBegin your adventure? (Y/N): ").upper() != 'Y':
+    print("You are not ready yet. Life does not wait...")
+    sys.exit()
+
+wisdom, patience, will, detachment = 0, 0, 0, 0
+inventory = []
+
+# --- 1. FOREST ---
+clear_screen()
+print(Colors.GREEN + FOREST_ART + Colors.END)
+slow_print(
+    "Your journey begins in the ancient forest. You step beneath a canopy of ancient trees. Sunlight filters through leaves that whisper in a language older than memory. Paths twist and fade into moss and shadow. Every direction feels intentional.")
+opts = ["Follow the Paths", "Listen to the Woods", "Hunt the Presence", "Leave"]
+choice = get_choice(opts, wisdom, will, patience, detachment, inventory, FOREST_ART, Colors.GREEN)
+
+if choice == 1:
+    item = "Trailworn Sigil";
+    wisdom += 1;
+    inventory.append(item)
+    slow_print(f"\nYou received a {Colors.BOLD}'{item}'{Colors.END}.\n{ITEM_DATA[item]}", 0.015)
+elif choice == 2:
+    item = "Whisperleaf Charm";
+    patience += 1;
+    inventory.append(item)
+    slow_print(f"\nYou received a {Colors.BOLD}'{item}'{Colors.END}.\n{ITEM_DATA[item]}", 0.015)
+elif choice == 3:
+    item = "Gnarled Antler Shard";
+    will += 1;
+    inventory.append(item)
+    slow_print(f"\nYou received a {Colors.BOLD}'{item}'{Colors.END}.\n{ITEM_DATA[item]}", 0.015)
 else:
-    print("You are not ready yet. That is ok, but remember life does not wait until you are ready...")
-
-#hidden values
-wisdom = 0
-patience = 0
-will = 0
-detachment = 0
-
-
-#hidden path balance
-def hidden_path_unlocked(wisdom, will, patience):
-    return max(wisdom, will, patience) - min(wisdom, will, patience) <= 1
-
-
-
-print(
-'Your journey begins in the ancient forest. You step beneath a canopy of ancient trees. Sunlight filters through leaves that whisper in a language older than memory. The air is alive with unseen movement, and the forest seems to watch you as much as you watch it. Paths twist and fade into moss and shadow. Every direction feels intentional. You have arrived in the Forest. '
-)
-print('The land seems to wait for your decision.')
-#forest
-forest_outcome = int(input("What do you do?\n 1.Follow the Paths\n 2.Listen to the Woods\n 3.Hunt the Presence\n 4.Leave\n"))
-if forest_outcome == 1:
-    print("You received a 'Trailworn Sigil'.\nAn item etched by countless footsteps. ")
-    wisdom += 1
-elif forest_outcome == 2:
-    print("You received a 'Whisperleaf Charm'.\nA leaf that murmurs when held")
-    patience += 1
-elif forest_outcome == 3:
-    print("You received a 'Gnarled Antler Shard'.\nIts still warm with primal force.")
-    will += 1
-elif forest_outcome == 4:
-    print('You turn away from the whispering trees. The forest does not stop you, but the air grows heavier with every step. Roots give way to mud, and birdsong fades into distant croaks and silence. The ground ahead no longer forgives mistakes.')
+    slow_print("\nYou turn away. The air grows heavier. Roots give way to mud, and birdsong fades.")
     detachment += 1
+input("\n[Enter to move on]")
+
+# --- 2. MARSH ---
+clear_screen()
+print(Colors.PURPLE + MARSH_ART + Colors.END)
+slow_print(
+    "The ground softens as the forest gives way to mist and stagnant water. Bubbles rise slowly from dark pools. Each step threatens to pull you deeper than you intend. The bog remembers travelers.")
+opts = ["Trace the Dry Ground", "Harvest the Mire", "Stir What Sleeps Below", "Leave"]
+choice = get_choice(opts, wisdom, will, patience, detachment, inventory, MARSH_ART, Colors.PURPLE)
+
+if choice == 1:
+    item = "Fenwalker's Mark";
+    wisdom += 1;
+    inventory.append(item)
+    slow_print(f"\nYou received {Colors.BOLD}'{item}'{Colors.END}.\n{ITEM_DATA[item]}", 0.015)
+elif choice == 2:
+    item = "Murksap Phial";
+    patience += 1;
+    inventory.append(item)
+    slow_print(f"\nYou received a {Colors.BOLD}'{item}'{Colors.END}.\n{ITEM_DATA[item]}", 0.015)
+elif choice == 3:
+    item = "Bogfang Relic";
+    will += 1;
+    inventory.append(item)
+    slow_print(f"\nYou received a {Colors.BOLD}'{item}'{Colors.END}.\n{ITEM_DATA[item]}", 0.015)
 else:
-    print('Adventures allow for freedom of choice, but this is not one of those choices...')
-
-
-#marsh/bog
-print('The ground softens beneath your feet as the forest gives way to mist and stagnant water. Reeds sway though there is no wind. Bubbles rise slowly from dark pools, breaking the silence. Each step threatens to pull you deeper than you intend. The bog does not welcome travelers but it remembers them. You have arrived in the Marsh.')
-marsh_outcome = int(input('What do you do?\n 1.Trace the Dry Ground\n 2.Harvest the Mire\n 3.Stir What Sleeps Below\n 4.Leave\n'))
-if marsh_outcome == 1:
-    print("You received 'Fenwalker's Mark'.\nA mud-caked emblem of survival.")
-    wisdom += 1
-elif marsh_outcome == 2:
-    print("You received a 'Murksap Phial'.\nThick, slow-moving, but faintly alive.")
-    patience += 1
-elif marsh_outcome == 3:
-    print("You received a 'Bogfang Relic'.\nIt was pulled from something that did not wish to surface.")
-    will += 1
-elif marsh_outcome == 4:
-    print("You pull free from the mire. Mist thins, water dries, and the land begins to crack. The world no longer hides its dangers.")
+    slow_print("\nYou pull free from the mire. Mist thins, water dries, and the land begins to crack.")
     detachment += 1
-else:
-    print('Adventures allow for freedom of choice, but this is not one of those choices...')
+input("\n[Enter to move on]")
 
-#desert
-print('Heat crashes down upon you like a physical force. Endless dunes stretch to the horizon, their shapes shifting with every passing moment. Ruins half-buried by sand hint at civilizations that challenged the sun — and lost. The desert offers clarity or madness, depending on your resolve. You have arrived in the Desert.')
-desert_outcome = int(input('What do you do?\n 1.Read the Dunes\n 2.Collect the Mirage\n 3.Challenge the Sun\n 4.Leave\n'))
-if desert_outcome == 1:
-    print("You received a 'Sun-Written Fragment'.\nPatterns are burned into ancient stone.")
-    wisdom += 1
-elif desert_outcome == 2:
-    print("You received 'Glassbound Dew'.\nWater that should not exist.")
-    patience += 1
-elif desert_outcome == 3:
-    print("You received a 'Scorched Crest'.\nProof that will can rival heat.")
-    will += 1
-elif desert_outcome == 4:
-    print('You leave the dunes behind. The horizon stretches wide as sand cools beneath your feet. What was barren is now unfathomable.')
+# --- 3. DESERT ---
+clear_screen()
+print(Colors.GOLD + DESERT_ART + Colors.END)
+slow_print(
+    "Heat crashes down like a physical force. Endless dunes stretch to the horizon. Ruins half-buried hint at civilizations that lost. The desert offers clarity or madness.")
+opts = ["Read the Dunes", "Collect the Mirage", "Challenge the Sun", "Leave"]
+choice = get_choice(opts, wisdom, will, patience, detachment, inventory, DESERT_ART, Colors.GOLD)
+
+if choice == 1:
+    item = "Sun-Written Fragment";
+    wisdom += 1;
+    inventory.append(item)
+    slow_print(f"\nYou received a {Colors.BOLD}'{item}'{Colors.END}.\n{ITEM_DATA[item]}", 0.015)
+elif choice == 2:
+    item = "Glassbound Dew";
+    patience += 1;
+    inventory.append(item)
+    slow_print(f"\nYou received {Colors.BOLD}'{item}'{Colors.END}.\n{ITEM_DATA[item]}", 0.015)
+elif choice == 3:
+    item = "Scorched Crest";
+    will += 1;
+    inventory.append(item)
+    slow_print(f"\nYou received a {Colors.BOLD}'{item}'{Colors.END}.\n{ITEM_DATA[item]}", 0.015)
+else:
+    slow_print("\nYou leave. The horizon stretches wide as sand cools.")
     detachment += 1
-else:
-    print('Adventures allow for freedom of choice, but this is not one of those choices...')
+input("\n[Enter to move on]")
 
-#ocean
-print('The land ends abruptly, swallowed by an endless sea. Waves roll in with a rhythm that feels deliberate, as though the ocean breathes. Beneath the surface, shadows move where light cannot reach. The water promises both wonder and oblivion. You have arrived at the Ocean.')
-ocean_outcome = int(input('What do you do?\n 1.Dive Below\n 2.Cast into the Deep\n 3.Challenge the Depths\n 4.Leave\n'))
-if ocean_outcome == 1:
-    print("You received an 'Echo Pearl'.\nIt hums with distant memories.")
-    wisdom += 1
-elif ocean_outcome == 2:
-    print("You received  a 'Abyssline Scale'.\nIt was drawn from unseen depths.")
-    patience += 1
-elif ocean_outcome == 3:
-    print("You received a 'Tidebound Fang'.\nIt is salt-stained but unbroken.")
-    will += 1
-elif ocean_outcome == 4:
-    print('You turn from the sea. Waves fall silent behind you as the air thickens and the scent of sulfur replaces salt. The land rises and darkens, glowing faintly from within. The calm gives way to fury.')
+# --- 4. OCEAN ---
+clear_screen()
+print(Colors.BLUE + OCEAN_ART + Colors.END)
+slow_print(
+    "The land ends abruptly, swallowed by an endless sea. Waves roll in with a rhythm that feels deliberate. Beneath the surface, shadows move. The water promises wonder and oblivion.")
+opts = ["Dive Below", "Cast into the Deep", "Challenge the Depths", "Leave"]
+choice = get_choice(opts, wisdom, will, patience, detachment, inventory, OCEAN_ART, Colors.BLUE)
+
+if choice == 1:
+    item = "Echo Pearl";
+    wisdom += 1;
+    inventory.append(item)
+    slow_print(f"\nYou received an {Colors.BOLD}'{item}'{Colors.END}.\n{ITEM_DATA[item]}", 0.015)
+elif choice == 2:
+    item = "Abyssline Scale";
+    patience += 1;
+    inventory.append(item)
+    slow_print(f"\nYou received a {Colors.BOLD}'{item}'{Colors.END}.\n{ITEM_DATA[item]}", 0.015)
+elif choice == 3:
+    item = "Tidebound Fang";
+    will += 1;
+    inventory.append(item)
+    slow_print(f"\nYou received a {Colors.BOLD}'{item}'{Colors.END}.\n{ITEM_DATA[item]}", 0.015)
+else:
+    slow_print("\nYou turn from the sea. The air thickens with the scent of sulfur.")
     detachment += 1
-else:
-    print('Adventures allow for freedom of choice, but this is not one of those choices...')
+input("\n[Enter to move on]")
 
-#volcano
-print('The air grows heavy with ash and heat. Cracks in the earth glow faintly, pulsing like a heartbeat. The ground trembles, not violently but constantly,as if the land itself is barely restrained. This is a place where creation and destruction are the same act. You have arrived at the Volcano.')
-volcano_outcome = int(input('What do you do?\n 1.Descend the Slopes\n 2.Gather the Ash\n 3.Face the Flames\n 4.Leave\n'))
-if volcano_outcome == 1:
-    print("You received a 'Obsidian Waystone'.\nIts worn smooth from heat and time.")
-    wisdom += 1
-elif volcano_outcome == 2:
-    print("You received a 'Cinder Reliquary'.\nAn ash that refuses to cool.")
-    patience += 1
-elif volcano_outcome == 3:
-    print("You received an 'Emberheart Fragment'.\nIts still beating with fire.")
-    will += 1
-elif volcano_outcome == 4:
-    print('You retreat from the flames. Heat drains from the air with unnatural speed. Ash becomes snow, and the ground hardens beneath your steps. The world grows quiet. Too quiet. Fire no longer answers you.')
+# --- 5. VOLCANO ---
+clear_screen()
+print(Colors.RED + VOLCANO_ART + Colors.END)
+slow_print(
+    "The air grows heavy with ash. Cracks in the earth pulse like a heartbeat. The ground trembles constantly. Creation and destruction are the same act here.")
+opts = ["Descend the Slopes", "Gather the Ash", "Face the Flames", "Leave"]
+choice = get_choice(opts, wisdom, will, patience, detachment, inventory, VOLCANO_ART, Colors.RED)
+
+if choice == 1:
+    item = "Obsidian Waystone";
+    wisdom += 1;
+    inventory.append(item)
+    slow_print(f"\nYou received a {Colors.BOLD}'{item}'{Colors.END}.\n{ITEM_DATA[item]}", 0.015)
+elif choice == 2:
+    item = "Cinder Reliquary";
+    patience += 1;
+    inventory.append(item)
+    slow_print(f"\nYou received a {Colors.BOLD}'{item}'{Colors.END}.\n{ITEM_DATA[item]}", 0.015)
+elif choice == 3:
+    item = "Emberheart Fragment";
+    will += 1;
+    inventory.append(item)
+    slow_print(f"\nYou received an {Colors.BOLD}'{item}'{Colors.END}.\n{ITEM_DATA[item]}", 0.015)
+else:
+    slow_print("\nYou retreat. Heat drains away. Ash becomes snow. Fire no longer answers.")
     detachment += 1
-else:
-    print('Adventures allow for freedom of choice, but this is not one of those choices...')
+input("\n[Enter to move on]")
 
-#tundra
-print('The world falls silent. Snow stretches in every direction, unbroken and unforgiving. Your breath fogs the air, each exhale a reminder that survival here is never guaranteed. In the distance, something ancient watches from the cold. You have arrived in the Tundra.')
-tundra_outcome = int(input('What do you do?\n 1.Chart the White Expanse\n 2.Endure the Cold\n 3.Provoke the Silent Watcher\n 4.Leave\n'))
-if tundra_outcome == 1:
-    print("You received a 'Frostbound Compass'.\nThe needle always points forward, never back.")
-    wisdom += 1
-elif tundra_outcome == 2:
-    print("You received a 'Winterbone Talisman'.\nIts warm despite the frigid air.")
-    patience += 1
-elif tundra_outcome == 3:
-    print("You received a 'Glacier Eye Shard'.\nIt somehow feels as if its aware you are observing it.")
-    will += 1
-elif tundra_outcome == 4:
-    print('You press onward through the cold. The flat white expanse begins to rise, snow clinging to jagged stone. The path ahead must be earned.')
+# --- 6. TUNDRA ---
+clear_screen()
+print(Colors.WHITE + TUNDRA_ART + Colors.END)
+slow_print(
+    "The world falls silent. Snow stretches in every direction. Your breath fogs the air. Something ancient watches from the cold.")
+opts = ["Chart the White Expanse", "Endure the Cold", "Provoke the Silent Watcher", "Leave"]
+choice = get_choice(opts, wisdom, will, patience, detachment, inventory, TUNDRA_ART, Colors.WHITE)
+
+if choice == 1:
+    item = "Frostbound Compass";
+    wisdom += 1;
+    inventory.append(item)
+    slow_print(f"\nYou received a {Colors.BOLD}'{item}'{Colors.END}.\n{ITEM_DATA[item]}", 0.015)
+elif choice == 2:
+    item = "Winterbone Talisman";
+    patience += 1;
+    inventory.append(item)
+    slow_print(f"\nYou received a {Colors.BOLD}'{item}'{Colors.END}.\n{ITEM_DATA[item]}", 0.015)
+elif choice == 3:
+    item = "Glacier Eye Shard";
+    will += 1;
+    inventory.append(item)
+    slow_print(f"\nYou received a {Colors.BOLD}'{item}'{Colors.END}.\n{ITEM_DATA[item]}", 0.015)
+else:
+    slow_print("\nYou press onward. The flat white expanse begins to rise.")
     detachment += 1
-else:
-    print('Adventures allow for freedom of choice, but this is not one of those choices.')
+input("\n[Enter to move on]")
 
-#mountainous region
-print('Jagged peaks rise above you, piercing the sky. The climb ahead is steep, the air thin and sharp. Every sound echoes, carrying farther than it should. From this height, the world feels smaller and more fragile. Only those who endure reach the summit. You have arrived in the Mountains.')
-mountain_outcome = int(input('What do you do?\n 1.Climb the Ancient Paths\n 2.Mine the Heights\n 3.Defy the Summit\n 4.Leave\n'))
-if mountain_outcome == 1:
-    print("You received 'Skycarved Relic'.\nIt was etched by wind and effort.")
-    wisdom += 1
-elif mountain_outcome == 2:
-    print("You received an 'Ironvein Core'.\nIts dense with quiet strength like that of an immovable boulder.")
-    patience += 1
-elif mountain_outcome == 3:
-    print("You have received a 'Crownstone Fragment'.\nIt was taken from a place few reach")
-    will += 1
-elif mountain_outcome == 4:
-    print('You have decided to leave.')
+# --- 7. MOUNTAINS ---
+clear_screen()
+print(Colors.CYAN + MOUNTAIN_ART + Colors.END)
+slow_print(
+    "Jagged peaks rise above you. The air is thin and sharp. Every sound echoes farther than it should. Only those who endure reach the summit.")
+opts = ["Climb the Ancient Paths", "Mine the Heights", "Defy the Summit", "Leave"]
+choice = get_choice(opts, wisdom, will, patience, detachment, inventory, MOUNTAIN_ART, Colors.CYAN)
+
+if choice == 1:
+    item = "Skycarved Relic";
+    wisdom += 1;
+    inventory.append(item)
+    slow_print(f"\nYou received {Colors.BOLD}'{item}'{Colors.END}.\n{ITEM_DATA[item]}", 0.015)
+elif choice == 2:
+    item = "Ironvein Core";
+    patience += 1;
+    inventory.append(item)
+    slow_print(f"\nYou received an {Colors.BOLD}'{item}'{Colors.END}.\n{ITEM_DATA[item]}", 0.015)
+elif choice == 3:
+    item = "Crownstone Fragment";
+    will += 1;
+    inventory.append(item)
+    slow_print(f"\nYou have received a {Colors.BOLD}'{item}'{Colors.END}.\n{ITEM_DATA[item]}", 0.015)
+else:
+    slow_print("\nYou have decided to leave. Stone crumbles in surrender.")
     detachment += 1
-else:
-    print('Adventures allow for freedom of choice, but this is not one of those choices.')
+input("\n[Enter to face judgment]")
 
-#determine whether hidden path is unlocked
-if hidden_path_unlocked(wisdom, will, patience):
-    # scales of sands
-    print('You leave the summit behind. Stone gives way to drifting sand suspended in the air. Every step feels measured, yet weightless.')
-    sands_outcome = int(input('What do you do?\n 1.Step onto the Scales\n 2.Still the Flowing Sand\n 3.Witness the Measure\n 4.Leave\n'))
-    if sands_outcome == 1:
-        print("You received an 'Equilibrium Sigil'.\nIts perfectly symmetrical and impossible to tilt no matter how hard you try.")
-    elif sands_outcome == 2:
-        print("You received 'Grain of the Whole'.\nOne grain, yet heavier than many. A true homage to the parts are greater than the whole.")
-    elif sands_outcome == 3:
-        print("You received the 'Unending Measure'.\nIt is neither full nor empty. A representation of human potential possibly?")
-    elif sands_outcome == 4:
-        print('The sand stills. The scales vanish.\nFor the first time, nothing is weighed. The sky opens not above you, but within you.')
+# --- HIDDEN PATH CHECK ---
+if max(wisdom, will, patience) - min(wisdom, will, patience) <= 1:
+    clear_screen()
+    print(Colors.GOLD + SCALES_ART + Colors.END)
+    slow_print("Stone gives way to drifting sand. Every step feels weightless. You stand before the Scales of Sands.")
+    opts = ["Step onto the Scales", "Still the Flowing Sand", "Witness the Measure", "Leave"]
+    choice = get_choice(opts, wisdom, will, patience, detachment, inventory, SCALES_ART, Colors.GOLD)
+    if choice == 1:
+        item = "Equilibrium Sigil";
+        inventory.append(item);
+        slow_print(f"Received: {item}. {ITEM_DATA[item]}")
+    elif choice == 2:
+        item = "Grain of the Whole";
+        inventory.append(item);
+        slow_print(f"Received: {item}. {ITEM_DATA[item]}")
+    elif choice == 3:
+        item = "Unending Measure";
+        inventory.append(item);
+        slow_print(f"Received: {item}. {ITEM_DATA[item]}")
     else:
-        print('Adventures allow for freedom of choice, but this is not one of those choices.')
+        slow_print("The sand stills. The scales vanish. The sky opens within you.")
+    input("\n[Enter to ascend]")
 else:
-    print('You leave the summit behind. The wind howls louder than before, stripping sound from the world. Stone crumbles beneath your final steps, not in collapse but in surrender. There is no threshold. No scale. No moment of judgment. The mountain simply ends. You rise. Not because you are ready, but because nothing remains to resist you. The sky does not open. It absorbs you.')
+    clear_screen()
+    slow_print("The mountain simply ends. You rise. The sky does not open. It absorbs you.")
+    input("\n[Enter to ascend]")
 
-#welkin
-print('The ground fades beneath your feet. You stand suspended between sky and thought, where clouds drift like forgotten dreams. The air hums softly, resonating with every choice you have made to reach this place. This realm does not test strength, it reveals truth. You have arrived in the Welkin.')
-welkin_outcome = int(input('What do you do?\n 1.Follow the Echoes\n 2.Hold Your Ground\n 3.Confront Yourself\n 4.Leave\n'))
-if welkin_outcome == 1:
-    print("You received a 'Memory Sigil'.\nIt was formed from momements overflowing with emotions.")
-elif welkin_outcome == 2:
-    print("You received an 'Aetherbound Anchor'.\nNo matter how its placed it refuses to drift away remaining bastioned where placed.")
-elif welkin_outcome == 3:
-    print("You received the 'True Name Shard'.\nIt is much heavier that it looks...")
-elif welkin_outcome == 4:
-    print('You have finished the journey.')
+# --- 8. WELKIN ---
+clear_screen()
+print(Colors.PURPLE + WELKIN_ART + Colors.END)
+slow_print("You stand suspended between sky and thought. Clouds drift like forgotten dreams. This realm reveals truth.")
+opts = ["Follow the Echoes", "Hold Your Ground", "Confront Yourself", "Leave"]
+choice = get_choice(opts, wisdom, will, patience, detachment, inventory, WELKIN_ART, Colors.PURPLE)
 
-# Outcomes
-# Rebuild stats dynamically
-stats_list = [wisdom, will, patience]
-total_stats = sum(stats_list)
+if choice == 1:
+    item = "Memory Sigil";
+    inventory.append(item);
+    slow_print(f"Received: {item}. {ITEM_DATA[item]}")
+elif choice == 2:
+    item = "Aetherbound Anchor";
+    inventory.append(item);
+    slow_print(f"Received: {item}. {ITEM_DATA[item]}")
+elif choice == 3:
+    item = "True Name Shard";
+    inventory.append(item);
+    slow_print(f"Received: {item}. {ITEM_DATA[item]}")
+else:
+    slow_print("The journey ends.")
 
-# Threshold for extreme detachment
-EXTREME_DETACHMENT = 5  # number of times the player leaves to trigger Silent Walker
+# --- FINAL CHRONICLE ---
+clear_screen()
+slow_print(f"{Colors.BOLD}--- THE FINAL CHRONICLE ---{Colors.END}")
+time.sleep(1)
 
-# Check for extreme detachment first
-if detachment >= EXTREME_DETACHMENT:
-    print("You have earned the title of 'The Silent Walker'. You walk in shadows and light with no emotion, simply observing the world as if you are not part of it.")
+stats = [wisdom, will, patience]
+if detachment >= 5:
+    title = f"{Colors.PURPLE}The Silent Walker{Colors.END}"
+    truth = "You walk in shadows and light with no emotion, simply observing."
+elif max(stats) - min(stats) <= 1 and sum(stats) > 0:
+    title = f"{Colors.GOLD}The Bearer of Scales{Colors.END}"
+    truth = "You are the Arbiter of Oneself and have reached self-mastery."
+elif wisdom >= max(will, patience):
+    title = f"{Colors.CYAN}The Listener Beyond Horizons{Colors.END}"
+    truth = "You have knowledge and insight surpassing that of what is visible."
+elif will >= max(wisdom, patience):
+    title = f"{Colors.RED}The Defiant Ascendant{Colors.END}"
+    truth = "You burn your own path no matter who or what stands in your way."
+else:
+    title = f"{Colors.GREEN}The Keeper who Remains{Colors.END}"
+    truth = "You are time-tested and stable like the world tree Yggdrasil."
 
-# Check for balance (Bearer of Scales)
-elif max(stats_list) - min(stats_list) <= 1 and total_stats > 0:
-    print("You have earned the title of 'The Bearer of Scales'. You are the Arbiter of Oneself and have reached self-mastery.")
-
-# Otherwise, give title based on highest stat
-elif wisdom >= will and wisdom >= patience:
-    print("You have earned the title of 'The Listener Beyond Horizons'. You have knowledge and insight surpassing that of what is visible.")
-elif will >= wisdom and will >= patience:
-    print("You have earned the title of 'The Defiant Ascendant'. You burn your own path no matter who or what stands in your way.")
-elif patience >= wisdom and patience >= will:
-    print("You have earned the title of 'The Keeper who Remains'. You are time-tested and stable like the world tree Yggdrasil.")
-
+print(f"\nTitle: {title}")
+print(f"Truth: {truth}")
+print(f"Final Inventory: {', '.join(inventory) if inventory else 'Empty'}")
+print(f"\n{Colors.BOLD}Thank you for playing An' Khalmar.{Colors.END}")
 # Catch-all
 else:
     print("You have completed your journey. You have earned the title of 'The Challenger'. May you rise again to the challenges you will face...")
